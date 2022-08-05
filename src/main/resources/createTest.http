@@ -1,0 +1,497 @@
+### 创建物模型服务
+POST http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/services
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "identifier": "temperature1",
+  "name": "3124124",
+  "desc": "string",
+  "type": "sync",
+  "inputs": [
+    {
+      "identifier": "temperature",
+      "name": "412",
+      "desc": "123",
+      "type": "bool",
+      "define": {
+        "max": 0,
+        "min": 0,
+        "unit": "string"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "identifier": "temperature",
+      "name": "123",
+      "desc": "31",
+      "type": "bool",
+      "define": {
+        "max": 0,
+        "min": 0,
+        "unit": "string"
+      }
+    }
+  ]
+}
+
+### 修改设备接入位置
+PUT http://{{host}}/api/v1/devices/1045/parent
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "parentID": 1004
+}
+
+### 修改设备连接信息
+PUT http://{{host}}/api/v1/devices/1049/connection
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "isTcp": false,
+  "rtu": {
+    "serialPort": "/dev/ttyS3",
+    "slaveID": 1,
+    "baudRate": 9600,
+    "dataBits": 8,
+    "stopBits": 1,
+    "parity": "none"
+  }
+}
+
+
+### 修改设备
+PATCH http://{{host}}/api/v1/devices/1049
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "id": 1049,
+  "name": "温湿度传感器s",
+  "desc": "wqeqwe"
+}
+
+### 修改物模型属性
+PATCH http://{{host}}/api/v1/deviceModels/1009/properties/temperature
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+
+### 修改物模型服务
+PATCH http://{{host}}/api/v1/deviceModels/1009/services/temperature1
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "identifier": "temperature1",
+  "name": "string",
+  "desc": "string",
+  "type": "sync",
+  "isStandard": true,
+  "inputs": [
+    {
+      "identifier": "string",
+      "name": "string",
+      "desc": "string",
+      "type": "bool",
+      "define": {
+        "max": 0,
+        "min": 0,
+        "unit": "string"
+      }
+    }
+  ],
+  "outputs": [
+    {
+      "identifier": "string",
+      "name": "string",
+      "desc": "string",
+      "type": "bool",
+      "define": {
+        "max": 0,
+        "min": 0,
+        "unit": "string"
+      }
+    }
+  ]
+}
+
+### 物模型属性列表
+GET http://{{host}}/api/v1/deviceModels/1001/properties?pageNum=1&pageSize=2
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 物模型服务列表
+GET http://{{host}}/api/v1/deviceModels/1009/services
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+### 物模型服务详情
+GET http://{{host}}/api/v1/deviceModels/1005/services/temperature
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+### 删除物模型服务
+DELETE http://{{host}}/api/v1/deviceModels/1005/services/temperature
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 删除物模型属性
+
+### 获取物模型属性详情
+GET http://{{host}}/api/v1/deviceModels/1006/properties/temperature
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+###
+# 调用边缘计算API数据采集冒烟测试
+
+### 第一大步:创建边缘设备
+### 1.1 创建边缘设备
+POST http://{{host}}/api/v1/devices
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 1,
+  "name": "{{deviceName}}",
+  "desc": "描述",
+  "protocol": "modbus",
+  "modelID": 1
+}
+
+### 查询设备节点
+GET http://{{host}}/api/v1/devices/1049
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+### type=1 边缘设备 modelID 是 int类型，对于边缘设备，固定填1
+
+### 1.2 查询设备列表
+GET http://{{host}}/api/v1/devices
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+### 第二大步 获得边缘设备的初始化构建脚本
+GET http://{{host}}/api/v1/edgeDevices/1004/installScript
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+
+### 第三大步、创建设备模型
+# 3.1 设备模型是一种产品型号的属性、事件及服务的定义。如建大仁科的 RS-WS-N01-8 型号温湿度传感器，具有 温度 和 湿度 两个属性。
+# 创建设备模型成功后，接口会返回ID（手动记录该ID，供后续步骤使用）。
+# type值:1-边缘节点的模型 2-设备的模型
+POST http://{{host}}/api/v1/deviceModels
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 2,
+  "name": "{{deviceModelName}}",
+  "desc": "模型描述"
+}
+
+
+###
+# 查询设备模型
+GET http://{{host}}/api/v1/deviceModels
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 3.2 创建设备模型属性
+# 给设备模型添加属性，如为了采集温湿度传感器的温度数据，需要先给设备模型添加温度属性（需要将第一步记录的模型ID，替换掉 URL 地址的 {{deviceModelID}}）。
+
+# 温度摄氏度
+POST http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/properties
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "identifier": "{{deviceModelPropertyIdentifier}}",
+  "name": "热度111",
+  "desc": "热度（摄氏度）",
+  "access": "r",
+  "type": "int",
+  "define": {
+    "max": 0,
+    "min": 0,
+    "unit": "热度"
+  }
+}
+
+###
+# 添加属性成功后，可以查询一下结果（需要将第一步记录的模型ID，替换掉 URL 地址的 {{deviceModelID}}）。
+GET http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/properties
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 3.3 发布设备模型
+#获取物理模型信息
+GET http://{{host}}/api/v1/deviceModels/{{deviceModelID}}
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+###
+# 模型准备好后，需要发布一下，模型才能生效。（需要将第一步记录的模型ID，替换掉 URL 地址的 {{deviceModelID}}）
+POST http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/publish
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 第四大步、创建设备
+# 4.1 模型发布好后，就可以添加设备实例了，比如可添加一个温湿度传感器设备（需要将第一步记录的模型ID，替换掉请求体 JSON 中的 {{deviceModelID}}）。
+# 创建设备成功后，接口会返回ID（手动记录该ID，供后续步骤使用）。
+POST http://{{host}}/api/v1/devices
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 2,
+  "name": "{{deviceName}}",
+  "desc": "描述",
+  "protocol": "opcua",
+  "modelID": {{deviceModelID}}
+}
+
+###
+# 查询设备列表
+GET http://{{host}}/api/v1/devices
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+###
+# 获取设备信息
+GET http://{{host}}/api/v1/devices/1048
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 4.2 设置设备接入位置
+# 创建设备时，未指定接入位置，可以在这里修改接入位置，需要预先准备好一个边缘设备。
+
+# 查询设备接入位置
+GET http://{{host}}/api/v1/devices/{{deviceID}}/parent
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+###
+#设备接入位置（需要将前提条件要求的边缘设备ID，替换掉请求头 JSON 中的 deviceEdgeID；还需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）
+PUT http://{{host}}/api/v1/devices/{{deviceID}}/parent
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "parentID": {{deviceEdgeID}}
+}
+
+
+### 4.3 修改设备连接
+
+# 查询设备连接
+GET http://{{host}}/api/v1/devices/{{deviceID}}/connection
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+###
+# 创建设备时，未指定设备连接地址信息，需要在这里进行配置（需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）。
+PUT http://{{host}}/api/v1/devices/{{deviceID}}/connection
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "url": "opc.tcp://192.168.3.140:4840",
+  "user": "admin",
+  "password": "Phr@12345"
+}
+
+
+
+
+
+
+### 4.4 修改设备点位映射
+
+# 查询点位映射
+GET http://{{host}}/api/v1/devices/{{deviceID}}/pointMapper
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+###
+# 创建设备时，未指定设备点位映射，需要在这里进行配置（需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）。
+PUT http://{{host}}/api/v1/devices/{{deviceID}}/pointMapper
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "properties": [
+    {
+      "identifier": "temperature",
+      "register": "HoldingRegister",
+      "offset": 0,
+      "limit": 1,
+      "isByteSwap": false,
+      "isRegisterSwap": false
+    }
+  ],
+  "events": [
+  ],
+  "services": [
+  ]
+}
+
+### 第五大步、配置驱动
+
+### 查询驱动列表
+GET http://{{host}}/api/v1/drivers
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 查询驱动详情
+GET http://{{host}}/api/v1/driver/1010
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+### 5.1 添加驱动
+POST http://{{host}}/api/v1/driver
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "name": "添加驱动11111",
+  "desc": "test",
+  "version": "v1",
+  "version_desc": "v1",
+  "protocol": "modbus",
+  "config": {
+    "id": 1001,
+    "image": "liamylian/mapper-modbus:latest",
+    "arch": "x86_64",
+    "Cmd": "111",
+    "Privileged": "",
+    "HostMode": "",
+    "Ports": "11",
+    "Devices": "",
+    "Volumes": "",
+    "Restarts": "",
+    "Ext": ""
+  }
+}
+
+### 5.2 添加驱动到边缘节点
+POST http://{{host}}/api/v1/edgeNode/1004/driver
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "driverID": 1002
+}
+
+
+### 5.3 部署驱动到边缘节点 必须的
+POST http://{{host}}/api/v1/edgeDevices/1004/driver/deploy
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "driverID": 1002,
+  "deviceID": 1016
+}
+
+### 查询边缘节点驱动设备
+GET http://{{host}}/api/v1/edgeDevices/1004/drivers
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 第六大步 最后 获取遥测上告数据有两种方式
+### 第一种方法 获取设备属性实时数据 (可能拿到的数据没有变化)
+# 上面步骤完成后,系统会自动判断设备信息已完善，并将设备的配置数据下发到边缘设备。然后就可以正常的获取实时数据了（需要将记录的设备ID，替换掉 URL 中的 {{deviceID}}）。
+GET http://{{host}}/api/v1/devices/{{deviceID}}/properties/data
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 第二种方法、使用MQTT方式订阅设备实时数据
+# 使用 MQTT 客户端连接到 MQTT Broker，然后订阅 device/device-1008/thing/event/property/post 主题，即可订阅到设备上报的属性数据。
+#
+# 消息格式为：
+#   {
+#	  "identifier": "humidity",
+#	  "type": "int",
+#	  "value": "458",
+#	  "timestamp": 1656567724923
+#   }
+
+# 删除设备
+DELETE http://{{host}}/api/v1/devices/1050
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+

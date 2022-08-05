@@ -1,0 +1,180 @@
+# opuca数据采集冒烟测试用例
+# 前提条件：
+#    1. 需要预先准备好一个边缘设备，用于设置子设备的接入位置。
+
+
+### 一、创建设备模型（给到物联网使用）
+# 设备模型是一种产品型号的属性、事件及服务的定义。如建大仁科的 RS-WS-N01-8 型号温湿度传感器，具有 温度 和 湿度 两个属性。
+# 创建设备模型成功后，接口会返回ID（手动记录该ID，供后续步骤使用）。
+POST http://{{host}}/api/v1/deviceModels
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 2,
+  "name": "{{deviceModelName}}",
+  "desc": "描述"
+}
+
+###
+# 创建模型后，可以查询一下结果。
+GET http://{{host}}/api/v1/deviceModels
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 二、创建设备模型属性（给到物联网使用）
+# 给设备模型添加属性，如为了采集温湿度传感器的温度数据，需要先给设备模型添加温度属性（需要将第一步记录的模型ID，替换掉 URL 地址的 {{deviceModelID}}）。
+POST http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/properties
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "identifier": "{{deviceModelPropertyIdentifier}}",
+  "name": "温度计-82",
+  "desc": "温度（摄氏度）",
+  "access": "r",
+  "type": "int",
+  "define": {
+    "max": 0,
+    "min": 10,
+    "unit": "摄氏度"
+  }
+}
+
+###
+# 添加属性成功后，可以查询一下结果（需要将第一步记录的模型ID，替换掉 URL 地址的 {{deviceModelID}}）。
+GET http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/properties
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 三、发布设备模型（给到物联网使用）
+# 模型准备好后，需要发布一下，模型才能生效。（需要将第一步记录的模型ID，替换掉 URL 地址的 {{deviceModelID}}）
+POST http://{{host}}/api/v1/deviceModels/{{deviceModelID}}/publish
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 四、创建设备（给到物联网使用）
+# 模型发布好后，就可以添加设备实例了，比如可添加一个温湿度传感器设备（需要将第一步记录的模型ID，替换掉请求体 JSON 中的 {{deviceModelID}}）。
+# 创建设备成功后，接口会返回ID（手动记录该ID，供后续步骤使用）。
+POST http://{{host}}/api/v1/devices
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 2,
+  "name": "{{deviceName}}+01",
+  "desc": "描述",
+  "protocol": "opcua",
+  "modelID": {{deviceModelID}}
+}
+
+###
+# 创建设备成功后，可以查询一下结果。
+GET http://{{host}}/api/v1/devices
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 五、设置设备接入边缘节点位置（给到物联网使用）
+# 第四步创建设备时，未指定接入位置，可以在这里修改接入位置，需要预先准备好一个边缘设备。
+#（需要将前提条件要求的边缘设备ID，替换掉请求头 JSON 中的 deviceEdgeID；还需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）
+PUT http://{{host}}/api/v1/devices/{{deviceID}}/parent
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "parentID": {{deviceEdgeID}}
+}
+
+
+### 六、修改设备设备连接（给到物联网使用）
+# 第四步创建设备时，未指定设备连接地址信息，需要在这里进行配置（需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）。
+# 可以使用无密码登录
+PUT http://{{host}}/api/v1/devices/{{deviceID}}/connection
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "url": "{{deviceAddress}}",
+  "user": "{{deviceUser}}",
+  "password": "{{devicePassword}}"
+}
+
+
+### 七、修改设备设备点位映射（给到物联网使用）
+# 第四步创建设备时，未指定设备点位映射，需要在这里进行配置（需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）。
+PUT http://{{host}}/api/v1/devices/{{deviceID}}/pointMapper
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "properties": [
+    {
+      "identifier": "{{deviceModelPropertyIdentifier}}",
+      "nodeID":"ns=4;i=2"
+    }
+  ],
+  "events": [
+  ],
+  "services": [
+  ]
+}
+
+
+### 八、获取设备属性实时数据（给到物联网使用）
+# 当第五、六、七步骤都完成后，系统会自动判断设备信息已完善，并将设备的配置数据下发的边缘设备。然后就可以正常的获取实时数据了（需要将第四步记录的设备ID，替换掉 URL 中的 {{deviceID}}）。
+GET http://{{host}}/api/v1/devices/{{deviceID}}/properties/data
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 九、使用MQTT方式订阅设备实时数据
+# 使用 MQTT 客户端连接到 MQTT Broker，然后订阅 device/{deviceID}/thing/property/post 主题，即可订阅到设备上报的属性数据。
+# 如使用命令订阅消息： mosquitto_sub -h 192.168.0.40 -t "device/{{deviceId}}/thing/property/post"
+#
+# 消息格式为：
+#   {
+#	  "identifier": "humidity",
+#	  "type": "int",
+#	  "value": "458",
+#	  "timestamp": 1656567724923
+#   }
+
+
+### 十、测试完删除模型及设备
+# 删除设备模型
+DELETE http://{{host}}/api/v1/deviceModels/{{deviceModelID}}
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+###
+# 删除设备模型
+DELETE http://{{host}}/api/v1/devices/{{deviceID}}
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}

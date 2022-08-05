@@ -1,0 +1,39 @@
+### 1.1 创建边缘设备
+POST http://{{host}}/api/v1/devices
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 1,
+  "name": "{{deviceName}}",
+  "desc": "描述",
+  "protocol": "modbus",
+  "modelID": 1
+}
+
+
+### 修改设备
+PATCH http://{{host}}/api/v1/devices/1049
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "id":1049,
+  "name": "温湿度传感器s",
+  "desc": "wqeqwe"
+}
+
+### 修改设备接入位置
+PUT http://{{host}}/api/v1/devices/1045/parent
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "parentID": 1004
+}

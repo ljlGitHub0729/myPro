@@ -1,0 +1,78 @@
+# opcua设备
+### 一、创建边缘设备
+POST http://{{host}}/api/v1/devices
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "type": 1,
+  "name": "{{deviceEdgeName}}",
+  "desc": "描述",
+  "protocol": "sync",
+  "modelID": 1
+}
+
+###
+# 创建设备成功后，可以查询一下结果。
+GET http://{{host}}/api/v1/devices
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 二、获取边缘设备纳管脚本
+### 使用上面的 deviceEdgeID 替换
+GET http://{{host}}/api/v1/edgeDevices/{{deviceEdgeID}}/installScript
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+
+### 三、创建驱动 (数据库已创建无需重复创建-创建到mysql)
+POST http://{{host}}/api/v1/driver
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "name": "{{driverName}}",
+  "desc": "{{driverDesc}}",
+  "version": "{{driverVersion}}",
+  "version_desc": "{{driverVersionDesc}}",
+  "protocol": "{{driverProtocol}}",
+  "config": {
+    "image": "{{driverImage}}",
+    "arch": "{{driverArch}}",
+    "cmd": "{{driverCmd}}",
+    "privileged": "{{driverPrivileged}}",
+    "hostmode": "{{driverHostMode}}"
+  }
+}
+
+
+
+### 四、给边缘设备添加驱动（给到物联网使用）
+POST http://{{host}}/api/v1/edgeNode/{{deviceEdgeID}}/driver
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "driverID": {{driverID}}
+}
+
+### 五、给边缘设备部署驱动（给到物联网使用）
+POST http://{{host}}/api/v1/edgeDevices/{{deviceEdgeID}}/driver/deploy
+Content-Type: application/json
+Accept: application/json
+X-Tenant-Key: {{tenantKey}}
+x-User-Key: {{userKey}}
+
+{
+  "driverID": {{driverID}}
+}
+
